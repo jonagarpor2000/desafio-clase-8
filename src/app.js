@@ -1,6 +1,6 @@
 import express from 'express'
-import productsRouter from './routes/product.routes.js'
-import cartsRouter from './routes/cart.routes.js'
+import productRouter from './routes/product.routes.js'
+//import cartRouter from './routes/cart.routes.js'
 
 const app = express()
 
@@ -9,12 +9,13 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
 
-app.use('/api/products', productsRouter)
-app.use('/api/carts', cartsRouter)
+app.use('/api/products', productRouter)
+//app.use('/api/carts', cartRouter)
 
 app.use((error, req, res, next) => {
     console.log(error)
     res.status(500).send('Error 500 en el server')
+    next()
 })
 
 app.listen(8080, error => {

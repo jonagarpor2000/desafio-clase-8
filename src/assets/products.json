@@ -7,5 +7,14 @@
 		"thumbnail": ".imgprod.jpg",
 		"code": "abc12345",
 		"stock": 1
+	},
+	{
+		"id": 2,
+		"title": "testprod",
+		"description": "This is a sample product",
+		"price": 1000,
+		"thumbnail": ".imgprod2.jpg",
+		"code": "abc123456",
+		"stock": 5
 	}
 ]

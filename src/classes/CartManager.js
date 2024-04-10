@@ -38,41 +38,30 @@ path;
      this.#error=undefined;
      this.path = path
  }
-    getProducts = async() =>{
-        let val = await this.#readfilecontent(this.path)
-    return val;
+    getCarts = async() =>{
+        
     }
 
-    getProductById = async(id) => {
-        let contenido = await this.getProducts()
-        const product = contenido.find(producto => producto.id === id);
-        console.log(product)
-        if (product) return 'Not Found'
-        return product
-    }
 
-    addProduct = async(title,description,price,thumbnail,code,stock) =>{
-        this.#products = await this.getProducts()
-        let valor = this.#validateProductEntries(title, description, price, thumbnail,code,stock)
-        if (this.#error === undefined){ 
-            /** @type {Product}*/
-                const producto = {
-                id: this.#getNextId(),
-                title, 
-                description, 
-                price,
-                thumbnail, 
-                code,
-                stock,
+    createCart = async(cid,pid) =>{
+        try {
+            const contenido = await fs.readFile(this.path,'utf-8')
+            const carts = JSON.parse(contenido)
+            if(carts.find(cart => cart.id === cid)){
+                this.#error = 'El identificador de la carta ya existe'
+            }else{
+                const cart = {
+                    id: cid,
+                    products: [pid]
+                }
+                carts.push(cart)
+                await fs.writeFile(this.path, JSON.stringify(carts,null,'\t'),'utf-8' );
+                return 'Carta creada'
             }
-                this.#products.push(producto);
-                let result = this.#writefilecontent().then(val => console.logval)
-                return result
-
-            }else{ 
-
-                throw new Error (this.#error)
-            }
+        } catch(error){
+            console.log()
+        }
+        
     }
 
     #getNextId(){
@@ -84,11 +73,7 @@ path;
         return ultimaposicion;
     }
 
-    getProductById = async (idProduct) => {
-        let prods = await this.getProducts() 
-        return prods.find((product) => product.id === idProduct) ?? 'Not Found';   
-        
-    }
+    
 
     #readfilecontent = async (path) => {
         try{
@@ -111,7 +96,7 @@ path;
         }
     }
 
-    #validateProductEntries = (title, description, price, thumbnail, code, stock) => {
+    #validateCartEntries = (title, description, price, thumbnail, code, stock) => {
         if (!title || !description || !price || !thumbnail || !code || !stock) {
             this.#error = `[${code}]: campos incompletos`
         } else {

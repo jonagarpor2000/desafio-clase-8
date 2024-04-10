@@ -1,83 +1,58 @@
-import { Router } from 'express'
+import express from 'express'
 import { __dirname } from '../utils.js'
 import ProductManager from '../classes/ProductManager.js'
-import CartManager from '../classes/CartManager.js'
-const router = Router()
+const productRouter = express()
 
-let srcdirectory =__dirname + '/assets/products.json'
+const path_products = __dirname+'/assets/products.json'
 
-const prodmg = new ProductManager(srcdirectory)
-//crtmg = new CartManager()
+const pmg = new ProductManager(path_products)
 // configurar con alguna entidad
 // router.get('/', (req, res) => {} )
 // router.post('/', (req, res) => {} )
 
+productRouter.use(express.json())
+productRouter.use(express.urlencoded({extended: true}))
 
 
-
-router.get('/', async (req, res) => {
-    let prods = await prodmg.getProducts()
-    res.status(200).send(`Los productos son: ${prods}`)
-    console.log(`Prods: ${prods}`)
+productRouter.get('/',async (req, res) => {
+    let prods = await pmg.getProducts()
+    res.status(200).send(`Les productos son: ${JSON.stringify(prods)}`)
 })
 
 // enpoint para crear un usuario
-/*router.post('/', (req, res) => {
-    console.log(req.body)
-    const { first_name, last_name, email, password} = req.body
-    // console.log(first_name, last_name, email, password)
-    if(!email || !password) return res.send({status: 'error', error: 'faltan campos'})
-
-    const newUser = {
-        id: users.length +1,
-        first_name,
-        last_name,
-        email, 
-        password
-    }
-
-    users.push(newUser)
-
-
-    res.status(200).send({ status: 'success', payload: newUser })
+productRouter.post('/',async (req, res) => {
+    const {title,description,price,thumbnail,code,stock} = req.body
+    console.log(title,description,price,thumbnail,code,stock)
+    if(!title|| !description|| !price|| !thumbnail|| !code|| !stock) return res.send({status: 'error', error: 'faltan campos'})
+    let result = await pmg.addProduct(title,description,price,thumbnail,code,stock)
+    res.status(200).send({ status: 'success', payload: result})
 })
 
 // endpoint para traer un usuario por id
 //// http://localhost:8080 + /api/users + /uid
-router.get('/:uid', (req, res)=>{
+productRouter.get('/:uid', async (req, res)=>{
     const {uid} = req.params
-    const userFound = users.find(user => user.id === parseInt(uid))
-    // agregar validación
+    const userFound = await pmg.getProductById(parseInt(uid))
     res.send({status: 'success', payload: userFound})
     
 })
-// Endpoint para actualizar un usuario
-router.put('/:uid', (req, res) => {
-    const { uid } = req.params
-    const userToUpdate = req.body
-
-    const userIndex = users.findIndex(user => user.id === parseInt(uid))
-    if( userIndex === -1 ) return res.status(404).send({status: 'error', error: 'user not foun'})
-
-    users[userIndex] = { id: parseInt(uid),  ...userToUpdate }
-
-        
-
-    res.send({status: 'success', payload: userToUpdate})
+// Endpoint para actualizar un producto
+productRouter.put('/:uid', async (req, res) => {
+    const {uid} = req.params
+    const {title,description,price,thumbnail,code,stock} = req.body
+    let updateProduct = await pmg.updateProduct(parseInt(uid),title,description,price,thumbnail,code,stock)  
+    res.send({status: 'success', payload: updateProduct})
 
 })
 
-// endpoint para eliminar un usuario
-router.delete('/:uid', (req, res) => {
+// endpoint para eliminar un producto
+productRouter.delete('/:uid', async (req, res) => {
     const { uid } = req.params
 
-    const usersResutl = users.filter(user => user.id !== parseInt(uid))
+    const userdeleted = await pmg.deleteProduct(parseInt(uid))
 
-    res.send({status: 'success', payload: usersResutl})
-})*/
-
-
-export default router
+    res.send({status: 'success', payload: userdeleted})
+})
 
 
-// class -> function contructora function Router()
+export default productRouter

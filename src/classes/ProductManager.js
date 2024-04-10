@@ -1,5 +1,4 @@
-
-const {promises: fs, readFile,writeFile} = import ('fs');
+import { promises as fs } from "fs"
 
 /***
  * @typedef {Object} Product
