@@ -1,6 +1,4 @@
-import path from 'path';
-
-const {promises: fs, readFile,writeFile} = import ('fs');
+import { promises as fs } from "fs"
 
 /***
  * @typedef {Object} Product
@@ -23,7 +21,7 @@ export default class CartManager{
  /**
      * @type {Array<Product>}
      */
-#products;
+#carts;
 /**
  * @type {string} String que contiene error en caso de de que el retorno o cargado de productos falle.
  */
@@ -34,42 +32,62 @@ export default class CartManager{
 path;
 
  constructor(path){
-     this.#products = [];
+     this.#carts = [];
      this.#error=undefined;
      this.path = path
  }
     getCarts = async() =>{
+        return await this.#readfilecontent(this.path)
+    }
+
+    getCartById = async(id) =>{
+        try{
+            this.#carts = await this.getCarts()
+            return cart.find(c => c.id === id)
+        }catch (error){
+            this.#error = 'An error occurred when it tried to load the file'
+            return this.#error
+        }
+    }
+
+    createCart = async() =>{
+        try {
+            this.#carts = await this.getCarts()
+                const cart = {
+                    id: this.#getNextId(),
+                    products: []
+                }
+                this.#carts.push(cart)
+                let res = await this.#writefilecontent()
+                return res
+        } catch(error){
+            console.log(error)
+        }
         
     }
 
-
-    createCart = async(cid,pid) =>{
+    addProductToCart = async(cid,pid,quantity) =>{
         try {
-            const contenido = await fs.readFile(this.path,'utf-8')
-            const carts = JSON.parse(contenido)
-            if(carts.find(cart => cart.id === cid)){
-                this.#error = 'El identificador de la carta ya existe'
-            }else{
-                const cart = {
-                    id: cid,
-                    products: [pid]
+            this.#carts = await this.getCartById(cid)
+                const product = {
+                    pid: pid,
+                    quantity: quantity
                 }
-                carts.push(cart)
-                await fs.writeFile(this.path, JSON.stringify(carts,null,'\t'),'utf-8' );
-                return 'Carta creada'
-            }
+                this.#carts.products.push(cart)
+                let res = await this.#writefilecontent()
+                return res
         } catch(error){
-            console.log()
+            console.log(error)
         }
         
     }
 
     #getNextId(){
         let ultimaposicion = 1;
-        if(this.#products.length === 0){
+        if(this.#carts.length === 0){
             return ultimaposicion;
         }
-        ultimaposicion = this.#products.at(-1).id + 1; //Esto es por si me eliminan valores del medio
+        ultimaposicion = this.#carts.at(-1).id + 1; //Esto es por si me eliminan valores del medio
         return ultimaposicion;
     }
 
@@ -87,7 +105,7 @@ path;
 
     #writefilecontent = async () => {
         try{
-            fs.writeFile(this.path, JSON.stringify(this.#products,null,'\t'),'utf-8' );
+            fs.writeFile(this.path, JSON.stringify(this.#carts,null,'\t'),'utf-8' );
             return 'Producto aniadido'
         }catch (error){
 
@@ -100,19 +118,19 @@ path;
         if (!title || !description || !price || !thumbnail || !code || !stock) {
             this.#error = `[${code}]: campos incompletos`
         } else {
-            const found = this.#products.find(producto => producto.code === code)
+            const found = this.#carts.find(producto => producto.code === code)
             if (found) this.#error = `[${code}]: el identificador del producto ya existe`
             else this.#error = undefined
         }
     }
 
-    deleteProduct = async (id)=>{
-        let content = await this.getProducts()
+    /*deleteCart = async (id)=>{
+        let content = await this.getCarts()
         let cont_nodelete = content.filter(producto => producto.id != id)
         await fs.writeFile(this.path, JSON.stringify(cont_nodelete, null,'\t'),'utf-8')
     }
 
-    updateProduct = async (id,title, description, price, thumbnail,code,stock)=>{
+    updateCart = async (id,title, description, price, thumbnail,code,stock)=>{
         let contenido = await this.getProducts()
         let map_cont = contenido.map(producto => producto.id)
         let indx = map_cont.indexOf(id)
@@ -132,9 +150,9 @@ path;
             await fs.writeFile(this.path, JSON.stringify(contenido, null,'\t'))
         }
         
+        
 
-
-    };
+    };*/
 }
 
 

@@ -6,6 +6,7 @@ import { promises as fs } from "fs"
  * @property {string} title titulo del producto
  * @property {string} description (Descripcion del producto)
  * @property {number} price (precio del producto)
+ * @property {boolean} status (indicador de producto)
  * @property {string} thumbnail (ruta de imagen)
  * @property {string} code (código identificador)
  * @property {number} stock (número de piezas disponibles)
@@ -49,9 +50,9 @@ path;
         return product
     }
 
-    addProduct = async(title,description,price,thumbnail,code,stock) =>{
+    addProduct = async(title,description,price, status,thumbnail,code,stock) =>{
         this.#products = await this.getProducts()
-        let valor = this.#validateProductEntries(title, description, price, thumbnail,code,stock)
+        let valor = this.#validateProductEntries(title, description, price, status , thumbnail,code,stock)
         if (this.#error === undefined){ 
             /** @type {Product}*/
                 const producto = {
@@ -59,6 +60,7 @@ path;
                 title, 
                 description, 
                 price,
+                status: status ?? true,
                 thumbnail, 
                 code,
                 stock,
@@ -109,7 +111,7 @@ path;
         }
     }
 
-    #validateProductEntries = (title, description, price, thumbnail, code, stock) => {
+    #validateProductEntries = (title, description, price, status ,thumbnail, code, stock) => {
         if (!title || !description || !price || !thumbnail || !code || !stock) {
             this.#error = `[${code}]: campos incompletos`
         } else {
