@@ -23,7 +23,7 @@ cartRouter.post('/', async (req, res) => {
 
 cartRouter.post('/:cid/products/:pid', async (req, res) => {
     const {cid,pid} = req.params
-    const resp = await carts.addProductToCart(cid,{products:pid,quantity:1})
-
+    let response = await carts.addProductToCart(parseInt(cid),parseInt(pid))
+    res.status(200).send({ status: 'success', payload: response})
 })
 export default cartRouter

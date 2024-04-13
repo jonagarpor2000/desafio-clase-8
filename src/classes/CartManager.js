@@ -1,14 +1,12 @@
 import { promises as fs } from "fs"
+import { pid } from "process";
+
 
 /***
- * @typedef {Object} Product
- * @property {number} id identificador autoincremental
- * @property {string} title titulo del producto
- * @property {string} description (Descripcion del producto)
- * @property {number} price (precio del producto)
- * @property {string} thumbnail (ruta de imagen)
- * @property {string} code (código identificador)
- * @property {number} stock (número de piezas disponibles)
+ * @typedef {Object} Cart
+ * @property {number} cid identificador del carrito
+ * @property {string} products Array con ids del producto
+ * @property {string} quantity (Cantidad del producto)
  */
 
 /**
@@ -66,16 +64,24 @@ path;
         
     }
 
-    addProductToCart = async(cid,pid,quantity) =>{
+    addProductToCart = async(cid,pid) =>{
         try {
-            this.#carts = await this.getCartById(cid)
-                const product = {
-                    pid: pid,
-                    quantity: quantity
-                }
-                this.#carts.products.push(cart)
-                let res = await this.#writefilecontent()
-                return res
+            this.#carts = await this.getCarts()
+            const indiceCarro = this.#carts.findIndex((cart) => cart.id === cid);
+            if(indiceCarro === -1){
+                return 'El carrito no existe'
+            }else{
+                const existeProducto = this.#carts[indiceCarro].products.findIndex(
+             (cartProduct) => cartProduct.pid === pid
+              )
+            if(existeProducto!== -1){
+                this.#carts[indiceCarro].products[existeProducto].quantity += 1
+            }else{
+                this.#carts[indiceCarro].products.push({pid:pid,quantity:1})
+            } 
+            await this.#writefilecontent()
+            return `Producto agregado con exito`
+            }
         } catch(error){
             console.log(error)
         }
@@ -106,7 +112,7 @@ path;
     #writefilecontent = async () => {
         try{
             fs.writeFile(this.path, JSON.stringify(this.#carts,null,'\t'),'utf-8' );
-            return 'Producto aniadido'
+            return 'Producto aniadido al carrito'
         }catch (error){
 
             this.#error = 'Ocurrio un error al escribir el archivo'
@@ -114,8 +120,8 @@ path;
         }
     }
 
-    #validateCartEntries = (title, description, price, thumbnail, code, stock) => {
-        if (!title || !description || !price || !thumbnail || !code || !stock) {
+    #validateCartEntries = (id,pid) => {
+        if (!id || !pid) {
             this.#error = `[${code}]: campos incompletos`
         } else {
             const found = this.#carts.find(producto => producto.code === code)
@@ -124,7 +130,7 @@ path;
         }
     }
 
-    /*deleteCart = async (id)=>{
+    deleteCart = async (id)=>{
         let content = await this.getCarts()
         let cont_nodelete = content.filter(producto => producto.id != id)
         await fs.writeFile(this.path, JSON.stringify(cont_nodelete, null,'\t'),'utf-8')
@@ -152,7 +158,7 @@ path;
         
         
 
-    };*/
+    };
 }
 
 
