@@ -18,10 +18,10 @@ productRouter.get('/',async (req, res) => {
 
 // enpoint para crear un usuario
 productRouter.post('/',async (req, res) => {
-    const {title,description,price,thumbnail,code,stock} = req.body
-    console.log(title,description,price,thumbnail,code,stock)
-    if(!title|| !description|| !price|| !thumbnail|| !code|| !stock) return res.send({status: 'error', error: 'faltan campos'})
-    let result = await pmg.addProduct(title,description,price,thumbnail,code,stock)
+    const {title,description,price,status,thumbnail,code,stock} = req.body
+    console.log(title,description,price,status,thumbnail,code,stock)
+    if(!title|| !description|| !price||!status|| !thumbnail|| !code|| !stock) return res.send({status: 'error', error: 'faltan campos'})
+    let result = await pmg.addProduct(title,description,price,status,thumbnail,code,stock)
     res.status(200).send({ status: 'success', payload: result})
 })
 

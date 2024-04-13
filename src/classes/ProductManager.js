@@ -1,4 +1,4 @@
-import { promises as fs } from "fs"
+import { promises as fs, stat } from "fs"
 
 /***
  * @typedef {Object} Product
@@ -52,6 +52,7 @@ path;
 
     addProduct = async(title,description,price, status,thumbnail,code,stock) =>{
         this.#products = await this.getProducts()
+        
         let valor = this.#validateProductEntries(title, description, price, status , thumbnail,code,stock)
         if (this.#error === undefined){ 
             /** @type {Product}*/
@@ -112,7 +113,7 @@ path;
     }
 
     #validateProductEntries = (title, description, price, status ,thumbnail, code, stock) => {
-        if (!title || !description || !price || !thumbnail || !code || !stock) {
+        if (!title || !description || !price || !status || !thumbnail || !code || !stock) {
             this.#error = `[${code}]: campos incompletos`
         } else {
             const found = this.#products.find(producto => producto.code === code)
